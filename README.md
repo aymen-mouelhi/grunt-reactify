@@ -1,6 +1,6 @@
 # grunt-reactify
 
-> Grunt plugin to render react components
+> Grunt plugin to browserify modular react components into seperate files
 
 ## Getting Started
 This plugin requires Grunt.
@@ -25,59 +25,19 @@ In your project's Gruntfile, add a section named `reactify` to the data object p
 ```js
 grunt.initConfig({
   reactify: {
-    options: {
-      // Task-specific options go here.
-    },
-    your_target: {
-      // Target-specific file lists and/or options go here.
-    },
+    target_folder: source_files
   },
 })
 ```
-
-### Options
-
-#### options.separator
-Type: `String`
-Default value: `',  '`
-
-A string value that is used to do something with whatever.
-
-#### options.punctuation
-Type: `String`
-Default value: `'.'`
-
-A string value that is used to do something else with whatever else.
 
 ### Usage Examples
 
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+In this example, the `tmp` folder will get all the JSX files browserified from the source file. If there is a JSX file in the path `test/components/App.jsx`, the plugin will generate a browserified file in the destination `tmp/components/App.js`.
 
 ```js
 grunt.initConfig({
   reactify: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-})
-```
-
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
-
-```js
-grunt.initConfig({
-  reactify: {
-    options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
+      'tmp': 'test/**/*.jsx'
   },
 })
 ```

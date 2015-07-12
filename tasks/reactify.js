@@ -8,44 +8,63 @@
 
 'use strict';
 
+var browserify = require("browserify");
+
 module.exports = function (grunt) {
 
-  // Please see the Grunt documentation for more information regarding task
-  // creation: http://gruntjs.com/creating-tasks
+    // Please see the Grunt documentation for more information regarding task
+    // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('reactify', 'Grunt plugin to render react components', function () {
+    grunt.registerMultiTask('reactify', 'Grunt plugin to render react components', function () {
 
-    // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
-      punctuation: '.',
-      separator: ', '
+        var source = this.data;
+        var destination = this.target;
+        var done = this.async();
+        var responses = 0;
+
+        // Get all files of specified source folder
+        grunt.file.expand({filter: 'isFile'}, source).forEach(function (path, index, arr) {
+            // total number of files
+            grunt.log.writeln("Number of JSX files: " + arr.length);
+
+            // Read path
+            grunt.log.writeln("Reading file: " + path);
+
+            if (!grunt.file.exists(path)) {
+                grunt.log.error('Source file "' + path + '" not found.');
+                done('Source file "' + path + '" not found.');
+            }else{
+                // Create new browserify instance
+                var b = browserify();
+                // Add file
+                b.add(path);
+
+                // Reactify it
+                b.transform('reactify');
+
+                b.bundle(function (err, buf) {
+                    if (err) {
+                        grunt.log.error('file "' + path + '" couldn\'t be browserified .' + err);
+                        done(err);
+                    }
+
+                    // Get destination file path
+                    var fileName = path.substring(path.lastIndexOf('/'), path.length).replace('jsx', 'js');
+                    var dest = destination + path.substring(path.indexOf('/'), path.lastIndexOf('/')) + fileName;
+                    grunt.log.ok('File "' + dest + '" created.');
+
+                    // Write file to destination
+                    grunt.file.write(dest, buf);
+
+                    responses++;
+                });
+
+                if(responses === arr.length){
+                    done();
+                }
+            }
+        });
+
     });
-
-    // Iterate over all specified file groups.
-    this.files.forEach(function (file) {
-      // Concat specified files.
-      var src = file.src.filter(function (filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
-        } else {
-          return true;
-        }
-      }).map(function (filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(options.separator));
-
-      // Handle options.
-      src += options.punctuation;
-
-      // Write the destination file.
-      grunt.file.write(file.dest, src);
-
-      // Print a success message.
-      grunt.log.writeln('File "' + file.dest + '" created.');
-    });
-  });
-
 };
+
